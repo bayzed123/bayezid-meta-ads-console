@@ -68,6 +68,7 @@ It must never return access tokens, App Secrets, authorization headers, provider
 | `GET /api/admin/meta/assets` | Return safe Business Portfolio ad-account and Page metadata | Admin only | `X-Admin-Secret`; no tokens |
 | `GET /api/admin/meta/insights` | Return allowlisted campaign, ad-set, or ad reporting data | Admin only | `X-Admin-Secret`; constrained date presets and levels |
 | `GET /api/admin/meta/recommendations` | Return deterministic optimization suggestions from read-only campaign data | Admin only | `X-Admin-Secret`; never mutates campaigns |
+| `POST /api/admin/meta/campaign-plan-preview` | Validate a campaign brief and return a paused/no-spend plan preview | Admin only | `X-Admin-Secret`; preview only, no Meta mutation |
 | `GET /health` | Return non-sensitive service health | Public or restricted | Never reveal configuration values |
 
 ## Mutation requirements
@@ -76,7 +77,7 @@ Campaign creation must validate the tenant, principal, asset assignment, objecti
 
 Payment mutations must use provider adapters, idempotency keys, server-side webhook verification, amount and currency reconciliation, duplicate-event protection, and a manual exception state. A successful HTTP response from a provider is not sufficient to mark a payment settled until the provider status is reconciled.
 
-The initial Meta reporting and recommendation endpoints are intentionally operator-only and read-only. They use the Worker-side System User token, optionally add `appsecret_proof` when `FB_APP_SECRET` is configured, allowlist returned fields, and refuse unauthenticated requests. The public `/api/console/health` endpoint reports only boolean readiness states; it does not expose account names, IDs, insights, or credentials.
+The initial Meta reporting, recommendation, and campaign-plan preview endpoints are intentionally operator-only and non-spending. They use the Worker-side System User token, optionally add `appsecret_proof` when `FB_APP_SECRET` is configured, allowlist returned fields, and refuse unauthenticated requests. The public `/api/console/health` endpoint reports only boolean readiness states; it does not expose account names, IDs, insights, or credentials.
 
 ## Logging and observability
 
