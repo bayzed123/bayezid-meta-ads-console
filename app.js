@@ -28,3 +28,22 @@ document.querySelectorAll('.nav-link[href^="#"]').forEach((link) => {
     link.classList.add('active');
   });
 });
+
+const API_ORIGIN = 'https://bayezid-agency-api.sayadmdbayezidhosan.workers.dev';
+const apiStatus = document.getElementById('api-status');
+
+async function checkBackend() {
+  try {
+    const response = await fetch(`${API_ORIGIN}/api/console/health`, { headers: { Accept: 'application/json' } });
+    const result = await response.json();
+    if (!response.ok || !result.ok) throw new Error('health check failed');
+    const metaReady = result.console?.metaBusinessTokenConfigured;
+    apiStatus.innerHTML = `<span class="status-dot"></span><span>${metaReady ? 'Backend protected' : 'Backend online · setup pending'}</span>`;
+    apiStatus.title = metaReady ? 'Protected backend is online.' : 'Backend is online; META_BM_TOKEN still needs to be added in Cloudflare.';
+  } catch {
+    apiStatus.innerHTML = '<span class="status-dot" style="background:#ff967c"></span><span>Backend unavailable</span>';
+    apiStatus.title = 'The protected backend health endpoint could not be reached.';
+  }
+}
+
+checkBackend();
