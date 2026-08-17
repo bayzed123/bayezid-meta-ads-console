@@ -64,6 +64,9 @@ It must never return access tokens, App Secrets, authorization headers, provider
 | `POST /v1/billing/payment-intents` | Create a provider payment intent | Owner | Idempotency and provider verification required |
 | `POST /v1/webhooks/:provider` | Receive provider callbacks | Provider signature | Signature verification and replay protection |
 | `GET /v1/audit` | Return tenant-scoped audit events | Approver | Read only |
+| `GET /api/admin/meta/account` | Return safe ad-account metadata for the protected operator console | Admin only | `X-Admin-Secret`; no raw Graph errors |
+| `GET /api/admin/meta/assets` | Return safe Business Portfolio ad-account and Page metadata | Admin only | `X-Admin-Secret`; no tokens |
+| `GET /api/admin/meta/insights` | Return allowlisted campaign, ad-set, or ad reporting data | Admin only | `X-Admin-Secret`; constrained date presets and levels |
 | `GET /health` | Return non-sensitive service health | Public or restricted | Never reveal configuration values |
 
 ## Mutation requirements
@@ -71,6 +74,8 @@ It must never return access tokens, App Secrets, authorization headers, provider
 Campaign creation must validate the tenant, principal, asset assignment, objective, destination URL, budget, currency, schedule, creative policy state, and idempotency key. The first upstream campaign request should use a paused state. Activation requires a fresh authorization check, an explicit confirmation value, and an immutable audit event.
 
 Payment mutations must use provider adapters, idempotency keys, server-side webhook verification, amount and currency reconciliation, duplicate-event protection, and a manual exception state. A successful HTTP response from a provider is not sufficient to mark a payment settled until the provider status is reconciled.
+
+The initial Meta reporting endpoints are intentionally operator-only and read-only. They use the Worker-side System User token, optionally add `appsecret_proof` when `FB_APP_SECRET` is configured, allowlist returned fields, and refuse unauthenticated requests. The public `/api/console/health` endpoint reports only boolean readiness states; it does not expose account names, IDs, insights, or credentials.
 
 ## Logging and observability
 
